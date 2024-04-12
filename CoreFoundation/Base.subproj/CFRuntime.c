@@ -393,8 +393,8 @@ void _CFEnableZombies(void) {
 #define TYPE_ID_END 17
 
 CF_INLINE CFTypeID __CFTypeIDFromInfo(__CFInfoType info) {
-    // yes, 10 bits masked off, though 12 bits are there for the type field; __CFRuntimeClassTableSize is 1024
-    return (info & __CFInfoMask(TYPE_ID_END, TYPE_ID_START)) >> TYPE_ID_START;
+  // yes, 10 bits masked off, though 12 bits are there for the type field; __CFRuntimeClassTableSize is 1024
+  return (info & __CFInfoMask(TYPE_ID_END, TYPE_ID_START)) >> TYPE_ID_START;
 }
 
 /// Get the retain count from the low 32-bit field (the only one stored inline in 32 bit, and unused except for a marker in 64 bit)
@@ -733,13 +733,15 @@ CF_INLINE Boolean CFTYPE_IS_SWIFT(const void *obj) {
 
 CFTypeID CFGetTypeID(CFTypeRef cf) {
 #if defined(DEBUG)
-    if (NULL == cf) { CRSetCrashLogMessage("*** CFGetTypeID() called with NULL ***"); HALT; }
+  if (NULL == cf) {
+    CRSetCrashLogMessage("*** CFGetTypeID() called with NULL ***"); HALT;
+  }
 #endif
-    CFTYPE_OBJC_FUNCDISPATCH0(CFTypeID, cf, _cfTypeID);
-    CFTYPE_SWIFT_FUNCDISPATCH0(CFTypeID, cf, NSObject._cfTypeID);
+  CFTYPE_OBJC_FUNCDISPATCH0(CFTypeID, cf, _cfTypeID);
+  CFTYPE_SWIFT_FUNCDISPATCH0(CFTypeID, cf, NSObject._cfTypeID);
     
-    __CFGenericAssertIsCF(cf);
-    return __CFGenericTypeID_inline(cf);
+  __CFGenericAssertIsCF(cf);
+  return __CFGenericTypeID_inline(cf);
 }
 
 CF_PRIVATE CFTypeID _CFGetNonObjCTypeID(CFTypeRef cf) {
@@ -768,7 +770,7 @@ CF_PRIVATE void _CFAssertMismatchedTypeID(CFTypeID expected, CFTypeID actual) {
 }
 
 CF_INLINE CFTypeID __CFGenericTypeID_inline(const void *cf) {
-    return __CFTypeIDFromInfo(atomic_load(&(((CFRuntimeBase *)cf)->_cfinfoa)));
+  return __CFTypeIDFromInfo(atomic_load(&(((CFRuntimeBase *)cf)->_cfinfoa)));
 }
 
 
@@ -1080,60 +1082,66 @@ void *__CFAppleLanguages = NULL;
 // do not cache CFFIXED_USER_HOME or HOME, there are situations where they can change
 
 static struct {
-    const char *name;
-    const char *value;
+  const char *name;
+  const char *value;
 } __CFEnv[] = {
-    {"USER", NULL},
+  {"USER", NULL},
 #if TARGET_OS_WIN32
-    {"HOMEPATH", NULL},
-    {"HOMEDRIVE", NULL},
-    {"USERNAME", NULL},
+  {"HOMEPATH", NULL},
+  {"HOMEDRIVE", NULL},
+  {"USERNAME", NULL},
 #endif
-    {"TZFILE", NULL},
-    {"TZ", NULL},
-    {"NEXT_ROOT", NULL},
-    {"DYLD_IMAGE_SUFFIX", NULL},
-    {"CFProcessPath", NULL},
-    {"CFNETWORK_LIBRARY_PATH", NULL},
-    {"CFUUIDVersionNumber", NULL},
-    {"CFBundleDisableStringsSharing", NULL},
-    {"CFCharacterSetCheckForExpandedSet", NULL},
-    {"CF_CHARSET_PATH", NULL},
-    {"__CF_USER_TEXT_ENCODING", NULL},
-    {"APPLE_FRAMEWORKS_ROOT", NULL},
-    {"IPHONE_SIMULATOR_ROOT", NULL},
+  {"TZFILE", NULL},
+  {"TZ", NULL},
+  {"NEXT_ROOT", NULL},
+  {"DYLD_IMAGE_SUFFIX", NULL},
+  {"CFProcessPath", NULL},
+  {"CFNETWORK_LIBRARY_PATH", NULL},
+  {"CFUUIDVersionNumber", NULL},
+  {"CFBundleDisableStringsSharing", NULL},
+  {"CFCharacterSetCheckForExpandedSet", NULL},
+  {"CF_CHARSET_PATH", NULL},
+  {"__CF_USER_TEXT_ENCODING", NULL},
+  {"APPLE_FRAMEWORKS_ROOT", NULL},
+  {"IPHONE_SIMULATOR_ROOT", NULL},
 #if !DEPLOYMENT_RUNTIME_OBJC
-    {"HOME", NULL},
-    {"XDG_DATA_HOME", NULL},
-    {"XDG_CONFIG_HOME", NULL},
-    {"XDG_DATA_DIRS", NULL},
-    {"XDG_CONFIG_DIRS", NULL},
-    {"XDG_CACHE_HOME", NULL},
-    {"XDG_RUNTIME_DIR", NULL},
+  {"HOME", NULL},
+  {"XDG_DATA_HOME", NULL},
+  {"XDG_CONFIG_HOME", NULL},
+  {"XDG_DATA_DIRS", NULL},
+  {"XDG_CONFIG_DIRS", NULL},
+  {"XDG_CACHE_HOME", NULL},
+  {"XDG_RUNTIME_DIR", NULL},
 #endif
-    {NULL, NULL}, // the last one is for optional "COMMAND_MODE" "legacy", do not use this slot, insert before
+  {NULL, NULL}, // the last one is for optional "COMMAND_MODE" "legacy", do not use this slot, insert before
 };
 
 CF_PRIVATE const char *__CFgetenv(const char *n) {
-    for (CFIndex idx = 0; idx < sizeof(__CFEnv) / sizeof(__CFEnv[0]); idx++) {
-	if (__CFEnv[idx].name && 0 == strcmp(n, __CFEnv[idx].name)) return __CFEnv[idx].value;
+  for (CFIndex idx = 0; idx < sizeof(__CFEnv) / sizeof(__CFEnv[0]); idx++) {
+    if (__CFEnv[idx].name && 0 == strcmp(n, __CFEnv[idx].name)) {
+      return __CFEnv[idx].value;
     }
-    return getenv(n);
+  }
+
+  return getenv(n);
 }
 
 CF_PRIVATE const char *__CFgetenvIfNotRestricted(const char *n) {
-    if (__CFProcessIsRestricted()) return NULL;     // !!! Assumption being this is faster than checking the env
-    return __CFgetenv(n);
+  if (__CFProcessIsRestricted()) {
+    return NULL;     // !!! Assumption being this is faster than checking the env
+  }
+
+  return __CFgetenv(n);
 }
 
 CF_PRIVATE Boolean __CFProcessIsRestricted(void) {
-    return issetugid();
+  return issetugid();
 }
 
 #if TARGET_OS_WIN32
-#define kNilPthreadT  INVALID_HANDLE_VALUE
+#  define kNilPthreadT  INVALID_HANDLE_VALUE
 #else
-#define kNilPthreadT  (_CFThreadRef)0
+#  define kNilPthreadT  (_CFThreadRef)0
 #endif
 
 
@@ -1178,12 +1186,14 @@ extern void libdispatch_init();
 #endif
 
 void __CFInitialize(void) {
-    if (!__CFInitialized && !__CFInitializing) {
-        __CFInitializing = 1;
+  if (!__CFInitialized && !__CFInitializing) {
+    __CFInitializing = 1;
 
 #if __HAS_DISPATCH__ && !TARGET_OS_MAC
     // libdispatch has to be initialized before CoreFoundation, so to avoid
     // issues with static initializer ordering, we are doing it explicitly.
+    //
+    // NOTE(wq): Defined at https://github.com/apple/swift-corelibs-libdispatch/blob/release/6.0/src/queue.c#L7212-L7290
     libdispatch_init();
 #endif
 
@@ -1191,158 +1201,159 @@ void __CFInitialize(void) {
     _CFPerformDynamicInitOfOSRecursiveLock(&CFPlugInGlobalDataLock);
 
 #if TARGET_OS_WIN32
-        if (!pthread_main_np()) HALT;   // CoreFoundation must be initialized on the main thread
+    if (!pthread_main_np()) HALT;   // CoreFoundation must be initialized on the main thread
 
-        DuplicateHandle(GetCurrentProcess(), GetCurrentThread(),
-                        GetCurrentProcess(), &_CFMainPThread, 0, FALSE,
-                        DUPLICATE_SAME_ACCESS);
+    DuplicateHandle(GetCurrentProcess(), GetCurrentThread(),
+                    GetCurrentProcess(), &_CFMainPThread, 0, FALSE,
+                    DUPLICATE_SAME_ACCESS);
 #elif _POSIX_THREADS
-        // move this next line up into the #if above after Foundation gets off this symbol. Also: <rdar://problem/39622745> Stop using _CFMainPThread
-        _CFMainPThread = pthread_self();
+    // move this next line up into the #if above after Foundation gets off this symbol. Also: <rdar://problem/39622745> Stop using _CFMainPThread
+    _CFMainPThread = pthread_self();
 #elif TARGET_OS_WASI
-        _CFMainPThread = kNilPthreadT;
+    _CFMainPThread = kNilPthreadT;
 #else
 #error Dont know how to get the main thread on this platform
 #endif
 
 #if TARGET_OS_WIN32
-        // Must not call any CF functions
-        __CFTSDWindowsInitialize();
+    // Must not call any CF functions
+    __CFTSDWindowsInitialize();
 #elif TARGET_OS_LINUX || TARGET_OS_BSD || (TARGET_OS_MAC && !DEPLOYMENT_RUNTIME_OBJC)
-        __CFTSDInitialize();
+    __CFTSDInitialize();
 #endif
-        __CFProphylacticAutofsAccess = true;
+    __CFProphylacticAutofsAccess = true;
 
-        for (CFIndex idx = 0; idx < sizeof(__CFEnv) / sizeof(__CFEnv[0]); idx++) {
-            if (__CFEnv[idx].name) {
-                char *r = NULL;
-                if ((r = getenv(__CFEnv[idx].name))) {
-                    __CFEnv[idx].value = r;
-                }
-            }
+    for (CFIndex idx = 0; idx < sizeof(__CFEnv) / sizeof(__CFEnv[0]); idx++) {
+      if (__CFEnv[idx].name) {
+        char *r = NULL;
+        if ((r = getenv(__CFEnv[idx].name))) {
+          __CFEnv[idx].value = r;
         }
-        
-#if TARGET_OS_MAC
-	UInt32 s, r;
-	__CFStringGetUserDefaultEncoding(&s, &r); // force the potential setenv to occur early
-	pthread_atfork(__cf_atfork_prepare, NULL, __cf_atfork_child);
-#endif
-
-
-#if DEPLOYMENT_RUNTIME_SWIFT        
-        extern uintptr_t __CFSwiftGetBaseClass(void);
-        
-        uintptr_t NSCFType = __CFSwiftGetBaseClass();
-        for (CFIndex idx = 1; idx < __CFRuntimeClassTableSize; idx++) {
-            __CFRuntimeObjCClassTable[idx] = NSCFType;
-        }
-#endif
-        
+      }
+    }
 
 #if TARGET_OS_MAC
-        {
-            CFIndex idx, cnt;
-            char **args = *_NSGetArgv();
-            cnt = *_NSGetArgc();
-            for (idx = 1; idx < cnt - 1; idx++) {
-                if (NULL == args[idx]) continue;
-                if (0 == strcmp(args[idx], "-AppleLanguages") && args[idx + 1]) {
-                    CFIndex length = strlen(args[idx + 1]);
-                    __CFAppleLanguages = malloc(length + 1);
-                    memmove(__CFAppleLanguages, args[idx + 1], length + 1);
-                    break;
-                }
-            }
-        }
+    UInt32 s, r;
+    __CFStringGetUserDefaultEncoding(&s, &r); // force the potential setenv to occur early
+    pthread_atfork(__cf_atfork_prepare, NULL, __cf_atfork_child);
 #endif
 
+#if DEPLOYMENT_RUNTIME_SWIFT
+    extern uintptr_t __CFSwiftGetBaseClass(void);
+
+    uintptr_t NSCFType = __CFSwiftGetBaseClass();
+    for (CFIndex idx = 1; idx < __CFRuntimeClassTableSize; idx++) {
+      __CFRuntimeObjCClassTable[idx] = NSCFType;
+    }
+#endif
+
+#if TARGET_OS_MAC
+    {
+      CFIndex idx, cnt;
+      char **args = *_NSGetArgv();
+      cnt = *_NSGetArgc();
+      for (idx = 1; idx < cnt - 1; idx++) {
+        if (NULL == args[idx]) continue;
+        if (0 == strcmp(args[idx], "-AppleLanguages") && args[idx + 1]) {
+          CFIndex length = strlen(args[idx + 1]);
+          __CFAppleLanguages = malloc(length + 1);
+          memmove(__CFAppleLanguages, args[idx + 1], length + 1);
+          break;
+        }
+      }
+    }
+#endif
 
 #if !TARGET_RT_64_BIT
-	for (CFIndex idx = 0; idx < NUM_EXTERN_TABLES; idx++) {
-            CFBasicHashCallbacks callbacks = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
-	    __NSRetainCounters[idx].table = CFBasicHashCreate(kCFAllocatorSystemDefault, kCFBasicHashHasCounts | kCFBasicHashLinearHashing | kCFBasicHashAggressiveGrowth, &callbacks);
-	    CFBasicHashSetCapacity(__NSRetainCounters[idx].table, 40);
-	    __NSRetainCounters[idx].lock = CFLockInit;
-	}
+    for (CFIndex idx = 0; idx < NUM_EXTERN_TABLES; idx++) {
+      CFBasicHashCallbacks callbacks = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
+      __NSRetainCounters[idx].table = CFBasicHashCreate(kCFAllocatorSystemDefault, kCFBasicHashHasCounts | kCFBasicHashLinearHashing | kCFBasicHashAggressiveGrowth, &callbacks);
+      CFBasicHashSetCapacity(__NSRetainCounters[idx].table, 40);
+      __NSRetainCounters[idx].lock = CFLockInit;
+    }
 #endif
 
-        /*** _CFRuntimeCreateInstance() can finally be called generally after this line. ***/
+    /*** _CFRuntimeCreateInstance() can finally be called generally after this line. ***/
 
-        CFNumberGetTypeID();		// NB: This does other work
+    CFNumberGetTypeID();		// NB: This does other work
 
-        __CFCharacterSetInitialize();
-        __CFDateInitialize();
-        
+    __CFCharacterSetInitialize();
+    __CFDateInitialize();
+
 #if DEPLOYMENT_RUNTIME_SWIFT
-        extern void __CFInitializeSwift(void);
-        __CFInitializeSwift();
+    extern void __CFInitializeSwift(void);
+    __CFInitializeSwift();
 #endif
-        
 
-        {
-            CFIndex idx, cnt = 0;
-            char **args = NULL;
+    {
+      CFIndex idx, cnt = 0;
+      char **args = NULL;
 #if TARGET_OS_MAC
-            args = *_NSGetArgv();
-            cnt = *_NSGetArgc();
+      args = *_NSGetArgv();
+      cnt = *_NSGetArgc();
 #elif TARGET_OS_WIN32
-            wchar_t *commandLine = GetCommandLineW();
-            // result is actually pointer to wchar_t *, make sure to account for that below
-            args = (char **)CommandLineToArgvW(commandLine, (int *)&cnt);
+      wchar_t *commandLine = GetCommandLineW();
+      // result is actually pointer to wchar_t *, make sure to account for that below
+      args = (char **)CommandLineToArgvW(commandLine, (int *)&cnt);
 #endif
-            CFIndex count;
-            CFStringRef *list, buffer[256];
-            list = (cnt <= 256) ? buffer : (CFStringRef *)malloc(cnt * sizeof(CFStringRef));
-            for (idx = 0, count = 0; idx < cnt; idx++) {
-                if (NULL == args[idx]) continue;
-#if TARGET_OS_WIN32
-                list[count] = CFStringCreateWithCharacters(kCFAllocatorSystemDefault, (const UniChar *)args[idx], wcslen((wchar_t *)args[idx]));
-#else
-                list[count] = CFStringCreateWithCString(kCFAllocatorSystemDefault, args[idx], kCFStringEncodingUTF8);
-                if (NULL == list[count]) {
-                    list[count] = CFStringCreateWithCString(kCFAllocatorSystemDefault, args[idx], kCFStringEncodingISOLatin1);
-                    // We CANNOT use the string SystemEncoding here;
-                    // Do not argue: it is not initialized yet, but these
-                    // arguments MUST be initialized before it is.
-                    // We should just ignore the argument if the UTF-8
-                    // conversion fails, but out of charity we try once
-                    // more with ISO Latin1, a standard unix encoding.
-                }
-#endif
-                if (NULL != list[count]) count++;
-            }
-            __CFArgStuff = CFArrayCreate(kCFAllocatorSystemDefault, (const void **)list, count, &kCFTypeArrayCallBacks);
-            if (list != buffer) free(list);
-#if TARGET_OS_WIN32
-            LocalFree(args);
-#endif
+      CFIndex count;
+      CFStringRef *list, buffer[256];
+      list = (cnt <= 256) ? buffer : (CFStringRef *)malloc(cnt * sizeof(CFStringRef));
+      for (idx = 0, count = 0; idx < cnt; idx++) {
+        if (NULL == args[idx]) {
+          continue;
         }
+#if TARGET_OS_WIN32
+        list[count] = CFStringCreateWithCharacters(kCFAllocatorSystemDefault, (const UniChar *)args[idx], wcslen((wchar_t *)args[idx]));
+#else
+        list[count] = CFStringCreateWithCString(kCFAllocatorSystemDefault, args[idx], kCFStringEncodingUTF8);
+        if (NULL == list[count]) {
+          list[count] = CFStringCreateWithCString(kCFAllocatorSystemDefault, args[idx], kCFStringEncodingISOLatin1);
+          // We CANNOT use the string SystemEncoding here;
+          // Do not argue: it is not initialized yet, but these
+          // arguments MUST be initialized before it is.
+          // We should just ignore the argument if the UTF-8
+          // conversion fails, but out of charity we try once
+          // more with ISO Latin1, a standard unix encoding.
+        }
+#endif
+        if (NULL != list[count]) {
+          count++;
+        }
+      }
+      __CFArgStuff = CFArrayCreate(kCFAllocatorSystemDefault, (const void **)list, count, &kCFTypeArrayCallBacks);
+      if (list != buffer) {
+        free(list);
+      }
+#if TARGET_OS_WIN32
+      LocalFree(args);
+#endif
+    }
 
-        _CFProcessPath();	// cache this early
+    _CFProcessPath();	// cache this early
 
-        __CFOAInitialize();
-        
+    __CFOAInitialize();
 
-        if (__CFRuntimeClassTableCount < 256) __CFRuntimeClassTableCount = 256;
-
+    if (__CFRuntimeClassTableCount < 256) {
+      __CFRuntimeClassTableCount = 256;
+    }
 
 #if defined(DEBUG) || defined(ENABLE_ZOMBIES)
-        const char *value = __CFgetenv("NSZombieEnabled");
-        if (value && (*value == 'Y' || *value == 'y')) _CFEnableZombies();
-        value = __CFgetenv("NSDeallocateZombies");
-        if (value && (*value == 'Y' || *value == 'y')) __CFDeallocateZombies = 0xff;
+    const char *value = __CFgetenv("NSZombieEnabled");
+    if (value && (*value == 'Y' || *value == 'y')) _CFEnableZombies();
+    value = __CFgetenv("NSDeallocateZombies");
+    if (value && (*value == 'Y' || *value == 'y')) __CFDeallocateZombies = 0xff;
 #endif
 
 #if defined(DEBUG) && TARGET_OS_MAC
-        CFLog(kCFLogLevelWarning, CFSTR("Assertions enabled"));
+    CFLog(kCFLogLevelWarning, CFSTR("Assertions enabled"));
 #endif
 
-        __CFProphylacticAutofsAccess = false;
+    __CFProphylacticAutofsAccess = false;
 
-        
-        __CFInitializing = 0;
-        __CFInitialized = 1;
-    }
+    __CFInitializing = 0;
+    __CFInitialized = 1;
+  }
 }
 
 #if TARGET_OS_WIN32

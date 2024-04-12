@@ -1459,9 +1459,9 @@
 				5B5D885E1BBC938800234F36 /* Products */,
 				B95FC97222AF0050005DEA0A /* SwiftXCTest.framework */,
 			);
-			indentWidth = 4;
+			indentWidth = 2;
 			sourceTree = "<group>";
-			tabWidth = 4;
+			tabWidth = 2;
 			usesTabs = 0;
 		};
 		5B5D885E1BBC938800234F36 /* Products */ = {
